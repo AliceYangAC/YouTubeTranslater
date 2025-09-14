@@ -1,4 +1,6 @@
-from pytubefix import YouTube
+import yt_dlp
+from yt_dlp.utils import DownloadError
+from datetime import datetime
 import whisper
 from langdetect import detect
 from googletrans import Translator
@@ -7,10 +9,42 @@ import os
 OUTPUT_DIR = "output"
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
+def timestamped_filename(base, ext):
+    ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+    return f"{base}_{ts}.{ext}"
+
 # Step 1: Download video from YouTube
-def download_video(youtube_url, filename="video.mp4"):
+def download_video(youtube_url):
+    """
+    Downloads the best video+audio into output/video.mp4.
+    Falls back to the single best file if the merge spec isn't available.
+    """
+    output_path = os.path.join(OUTPUT_DIR, "video.mp4").replace("\\", "/")
+
+    ydl_opts = {
+        "outtmpl": output_path,
+        # 1. Try merging best video + best audio
+        "format": "bestvideo+bestaudio/best",
+        "merge_output_format": "mp4",
+        "quiet": True,
+        "no_warnings": True,
+    }
+
+    try:
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            ydl.download([youtube_url])
+
+    except DownloadError as e:
+        # 2. Fallback to a single best‐quality file if merging fails
+        print(f"[yt-dlp] merge-spec failed: {e}\nFalling back to best single file…")
+        ydl_opts["format"] = "best"
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            ydl.download([youtube_url])
+
+    return output_path
+# def download_video(youtube_url, filename="video.mp4"):
     yt = YouTube(youtube_url)
-    video_stream = yt.streams.filter(progressive=True, file_extension='mp4').order_by('resolution').desc().first()
+    video_stream = yt.streams.get_highest_resolution().order_by('resolution').desc().first()
     
     # Download to the correct folder
     video_stream.download(output_path=OUTPUT_DIR, filename=filename)
