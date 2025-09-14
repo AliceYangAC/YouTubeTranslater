@@ -1,0 +1,8 @@
+# Whisper and dependencies
+git+https://github.com/openai/whisper.git
+pytubefix==1.0.0
+langdetect==1.0.9
+googletrans==4.0.0rc1
+ffmpeg-python==0.2.0
+torch>=1.10
+tk
