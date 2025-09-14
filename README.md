@@ -1,17 +1,18 @@
 # YouTubeTranslater
 
-A Python tool that downloads a YouTube video, transcribes its audio with OpenAI Whisper, auto-detects and translates the transcript into English, generates an SRT subtitle file, and adds captions back into the video.
+A Python-based tool with a GUI to allow the user to download a YouTube video, transcribe its audio with OpenAI Whisper, auto-detect the language of and translate the transcript into another chosen language, generates an SRT subtitle file, and adds the SRT subtitles back into the video.
 
 ---
 
 ## Features
 
+- Accept Youtube URL input and limited language selection through Tkinter GUI
 - Download any public YouTube video
 - Transcribe speech using OpenAI Whisper  
-- Auto-detect source language and translate to English  
+- Auto-detect source language to translate from
 - Generate timestamped `.srt` subtitle files  
 - Burn captions into a new MP4 video via FFmpeg  
-- Clean command-line interface with clear progress output  
+- View event pipeline logs on GUI
 
 ---
 
@@ -27,13 +28,13 @@ A Python tool that downloads a YouTube video, transcribes its audio with OpenAI 
 
 1. Clone this repository  
    ```bash
-   git clone https://github.com/AliceYangAC/YouTubeTranslater.git
-   cd YouTubeTranslater
+   git clone https://github.com/AliceYangAC/WhisperSRTube.git
+   cd WhisperSRTube
    ```
 
 2. Create and activate a Python 3.10+ virtual environment  
    ```bash
-   python3.10 -m venv .venv
+   py -m venv .venv
    source .venv/bin/activate      # macOS/Linux
    .\.venv\Scripts\activate       # Windows PowerShell
    ```
@@ -52,25 +53,23 @@ A Python tool that downloads a YouTube video, transcribes its audio with OpenAI 
 
 ## Usage
 
-Run the main script and pass a YouTube URL to line 139 at `[VIDEO ID]`:
+1. Run the `translator_gui.py` script to launch the GUI app:
 
 ```bash
-python translator.py
+py translator.py
 ```
 
-By default, the downloaded video is saved as `output/video.mp4`. After processing, you’ll find:
-
-- `output/video.mp4` (downloaded source)  
-- `output/captions.srt` (generated subtitles)  
-- `output/captioned_video.mp4` (final video with burned-in captions)  
+2. Input a YouTube URL and select a target language to translate the video to from the drop down list.
+3. Press `Start` and wait for the pipeline to finish.
+4. View output video and/or SRT subtitles in the untraced `output` folder on your local machine.
 
 ---
 
 ## Configuration
 
 - To change the Whisper model (e.g., from `base` to `small`), edit the `transcribe_audio()` call in `translator.py`  
-- Adjust FFmpeg parameters in `ensure_wav()` or subtitle burn-in section for custom sample rates or styling  
-- Modify output folder or naming conventions by updating the `OUTPUT_DIR` and `timestamped_filename()` function  
+- Modify output folder or naming conventions by updating the `OUTPUT_DIR` and `timestamped_filename()` function in the `translator.py` script.
+- To add more languages, add the language and its respective language code in the `LANGUAGES` dict in the `translator_gui.py` script.
 
 ---
 
@@ -89,15 +88,11 @@ By default, the downloaded video is saved as `output/video.mp4`. After processin
 
 ## Future Plans
 
-1. Interactive Web or Desktop GUI
+1. <del>Interactive Web or Desktop GUI</del>
 
-    - Local upload support for video files and URL input
+2. <del>Multi-Language Output</del
 
-    - Real-time progress logs and error reporting panel
-
-2. Multi-Language Output
-
-    - Let users choose target translation languages beyond English
+    - <del>Let users choose target translation languages beyond English</del>
 
     - Generate separate SRT files per language or a single multi-language SRT, incl. dual-language captions
 

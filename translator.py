@@ -42,16 +42,6 @@ def download_video(youtube_url):
             ydl.download([youtube_url])
 
     return output_path
-# def download_video(youtube_url, filename="video.mp4"):
-    yt = YouTube(youtube_url)
-    video_stream = yt.streams.get_highest_resolution().order_by('resolution').desc().first()
-    
-    # Download to the correct folder
-    video_stream.download(output_path=OUTPUT_DIR, filename=filename)
-    
-    full_path = os.path.join(OUTPUT_DIR, filename)
-    print(f"Downloaded video to {full_path}")
-    return full_path
 
 # Step 2: Transcribe audio using Whisper, separated by timestamp segments
 def transcribe_audio(audio_path):
@@ -135,6 +125,6 @@ def process_youtube_video(youtube_url):
     print("\n✅ All done! Your files are saved in the 'output' folder.")
 
 # Replace with your desired YouTube video URL
-if __name__ == "__main__":
-    video_url = "https://www.youtube.com/watch?v=sqcess88xCo"
-    process_youtube_video(video_url)
+# if __name__ == "__main__":
+#     video_url = "https://www.youtube.com/watch?v=sqcess88xCo"
+#     process_youtube_video(video_url)
