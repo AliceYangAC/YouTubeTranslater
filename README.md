@@ -1,4 +1,4 @@
-# YouTubeTranslater
+# WhisperSRTube
 
 A Python-based tool with a GUI to allow the user to download a YouTube video, transcribe its audio with OpenAI Whisper, auto-detect the language of and translate the transcript into another chosen language, generates an SRT subtitle file, and adds the SRT subtitles back into the video.
 
@@ -90,7 +90,7 @@ py translator.py
 
 1. <del>Interactive Web or Desktop GUI</del>
 
-2. <del>Multi-Language Output</del
+2. <del>Multi-Language Output</del>
 
     - <del>Let users choose target translation languages beyond English</del>
 

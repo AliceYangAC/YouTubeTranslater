@@ -8,7 +8,7 @@ import translator        # translator.py
 from langdetect import detect
 from googletrans import Translator as GoogleTranslator
 
-# A small set of language names & codes; extend this later
+# A small dict of language names & codes; extend this later
 LANGUAGES = {
     "English":     "en",
     "Spanish":     "es",
