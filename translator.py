@@ -4,15 +4,22 @@ from langdetect import detect
 from googletrans import Translator
 import os
 
+OUTPUT_DIR = "output"
+os.makedirs(OUTPUT_DIR, exist_ok=True)
+
 # Step 1: Download video from YouTube
-def download_video(youtube_url, output_path="video.mp4"):
+def download_video(youtube_url, filename="video.mp4"):
     yt = YouTube(youtube_url)
     video_stream = yt.streams.filter(progressive=True, file_extension='mp4').order_by('resolution').desc().first()
-    video_stream.download(filename=output_path)
-    print(f"Downloaded video to {output_path}")
-    return output_path
+    
+    # Download to the correct folder
+    video_stream.download(output_path=OUTPUT_DIR, filename=filename)
+    
+    full_path = os.path.join(OUTPUT_DIR, filename)
+    print(f"Downloaded video to {full_path}")
+    return full_path
 
-# Step 2: Transcribe audio using Whisper
+# Step 2: Transcribe audio using Whisper, separated by timestamp segments
 def transcribe_audio(audio_path):
     model = whisper.load_model("base")
     result = model.transcribe(audio_path, verbose=True)
@@ -25,13 +32,6 @@ def detect_language(text):
     print(f"Detected language: {lang}")
     return lang
 
-# Step 4: Translate to English
-# def translate_to_english(text, src_lang):
-#     translator = Translator()
-#     translated = translator.translate(text, src=src_lang, dest='en')
-#     print("Translation complete.")
-#     return translated.text
-
 # Step 4: Translate each segment to English
 def translate_segments(segments, src_lang):
     translator = Translator()
@@ -42,7 +42,9 @@ def translate_segments(segments, src_lang):
     return segments
 
 # Step 5: Generate SRT file
-def generate_srt(transcription_segments, srt_path="captions.srt"):
+def generate_srt(transcription_segments, filename="captions.srt"):
+    srt_path = os.path.join(OUTPUT_DIR, filename)
+
     def format_timestamp(seconds):
         hrs, secs = divmod(seconds, 3600)
         mins, secs = divmod(secs, 60)
@@ -55,20 +57,31 @@ def generate_srt(transcription_segments, srt_path="captions.srt"):
             end = format_timestamp(segment["end"])
             text = segment["text"].strip()
             f.write(f"{i}\n{start} --> {end}\n{text}\n\n")
+
     print(f"SRT file saved to {srt_path}")
     return srt_path
 
 # Step 6: Add subtitles to video using ffmpeg
-def add_subtitles_to_video(video_path, srt_path, output_path="captioned_video.mp4"):
+def add_subtitles_to_video(video_path, srt_path, filename="captioned_video.mp4"):
     import subprocess
+
+    # Ensure output directory exists
+    os.makedirs(OUTPUT_DIR, exist_ok=True)
+
+    # Normalize paths for FFmpeg (use forward slashes)
+    srt_path_ffmpeg = srt_path.replace("\\", "/")
+    output_path = os.path.join(OUTPUT_DIR, filename).replace("\\", "/")
+
     cmd = [
         "ffmpeg",
         "-i", video_path,
-        "-vf", f"subtitles={srt_path}",
+        "-vf", f"subtitles='{srt_path_ffmpeg}'",
         "-c:a", "copy",
         output_path
     ]
-    subprocess.run(cmd, check=True)
+
+    # Run as a shell command so FFmpeg parses the filter correctly
+    subprocess.run(" ".join(cmd), shell=True, check=True)
     print(f"Captioned video saved to {output_path}")
     return output_path
 
@@ -78,17 +91,14 @@ def process_youtube_video(youtube_url):
     video_path = download_video(youtube_url)
     segments = transcribe_audio(video_path)
 
-    # Combine all text to detect language
     full_text = " ".join([seg["text"] for seg in segments])
     src_lang = detect_language(full_text)
-
-    # Translate segments
     translated_segments = translate_segments(segments, src_lang)
 
     srt_path = generate_srt(translated_segments)
     captioned_video = add_subtitles_to_video(video_path, srt_path)
 
-    print("\n✅ All done! Your video now has English captions.")
+    print("\n✅ All done! Your files are saved in the 'output' folder.")
 
 # Replace with your desired YouTube video URL
 if __name__ == "__main__":
